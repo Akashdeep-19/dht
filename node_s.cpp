@@ -11,6 +11,8 @@
 #include <arpa/inet.h>
 #include <fstream>
 
+
+
 using namespace std;
 char filename[100000];
 int c;
@@ -163,6 +165,22 @@ class node
     }
 };
 
+
+int madhash(char str[])
+{
+      
+      int sum=0;
+      for(int i=0;str[i]!=0;i++)
+      {
+            sum=sum+(i+19973)%5;
+      }
+      sum=sum%5;
+      sum*=1000;
+      sum+=2000;
+      
+      return sum;
+}
+
 int main(int argc, char** argv){
     node* n = new node(atoi(argv[1]));
 
@@ -174,22 +192,24 @@ int main(int argc, char** argv){
         cout<<"Enter command : ";
         cin>>command;
         if(command == "store"){
-            cout<<"enter file name  ";
-            ;
+            cout<<"enter file name that you want to store ";
             cin>>filename;
+             int port;
 
-            //port =madhashfunction(filename) to give a value between the port numbers
+            port =madhash(filename);
 
-            int port=5000; // assume hash function gives 5000
+            
             c=1;
             n->client(port);
         }
         else if(command=="search"){
-            cout<<"enter file name";
+           cout<<"enter file name whose information you need ";
             cin>>filename;
-            //port =madhashfunction(filename) to give a value between the port numbers
+             int port;
 
-            int port=5000; // assume hash function gives 5000
+            port =madhash(filename);
+
+            
             c=2;
             n->client(port);
 
