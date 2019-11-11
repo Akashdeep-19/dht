@@ -17,6 +17,41 @@ using namespace std;
 char filename[100000];
 int c;
 
+struct Node{
+    int id;
+    struct Node* next;
+    struct Node* prev;
+};
+struct Node* head;
+
+void insert( int id) 
+{ 
+     
+    if (head == NULL) 
+    { 
+        struct Node* new_node = new Node; 
+        new_node->id = id; 
+        new_node->next = new_node->prev = new_node; 
+        head  = new_node; 
+        return; 
+    } 
+    Node *last = head->prev; 
+    struct Node* new_node = new Node; 
+    new_node->id =id; 
+    new_node->next = head; 
+    head->prev = new_node; 
+    new_node->prev = last; 
+    last->next = new_node; 
+} 
+
+void prework()
+{
+    insert(2000);
+    insert(3000);
+    insert(4000);
+    insert(5000);
+    insert(6000);
+}
 class node
 {
     int PORT;
@@ -82,10 +117,13 @@ class node
                      if(c[0]=='1')
                      { 
                          recv(newSocket,fname,10000,0);
-                         recv(newSocket,recievedstring,100000,0);
-                         ofstream myfile;
-                         myfile.open(fname);
-                         myfile<<recievedstring;
+                         FILE *ptr=fopen(fname,"w");
+                         while(recv(newSocket,recievedstring,100000,0))
+                         {
+                             fputs(recievedstring,ptr);
+                         }
+                         fclose(ptr);
+                         
 
                      }
                      else if(c[0]=='2')
@@ -153,6 +191,8 @@ class node
                 send(clientSocket,filename,100000,0);
                 recv(clientSocket,recievedfile,1000000,0);
                 cout<<"file recieved is - "<<endl<<recievedfile;c=0;
+                FILE *ptr=fopen("filename","w");
+                fputs(recievedfile,ptr);
             }
 
             if(strcmp(buffer, ":exit") == 0){
@@ -180,9 +220,41 @@ int madhash(char str[])
       
       return sum;
 }
+int  search(char str[])
+{
+    struct Node* temp=head;
+    struct Node* temp2=head;
+    int diff=1000000;;struct Node* p=head;
+    int hv=madhash(str);//value obtained from hash function
+    while(temp->next!=temp2)
+    {
+         int ds=temp->id-hv;
+           if(ds<0){ds*=-1;}
+         if(ds<diff)
+         {
+            if(ds<0){ds*=-1;} 
+            diff=ds;
+             p=temp;
+         }
+           
+         temp=temp->next;
+    }
+    
+    int ds=temp->id-hv;
+     if(ds<0){ds*=-1;}
+    if(ds<diff)
+    {
+        if(ds<0){ds*=-1;}
+        p=temp;
+    }
+    return p->id;
+    
+}
+
 
 int main(int argc, char** argv){
     node* n = new node(atoi(argv[1]));
+    prework();
 
     thread ser(&node::server,n);
 
@@ -196,7 +268,7 @@ int main(int argc, char** argv){
             cin>>filename;
              int port;
 
-            port =madhash(filename);
+            port =search(filename);
 
             
             c=1;
@@ -207,7 +279,7 @@ int main(int argc, char** argv){
             cin>>filename;
              int port;
 
-            port =madhash(filename);
+            port =search(filename);
 
             
             c=2;
